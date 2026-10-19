@@ -1,0 +1,28 @@
+name: Extract Uploaded Zip
+on:
+  push:
+    paths:
+      - '**.zip'
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract zip files
+        run: |
+          for file in *.zip; do
+            if [ -f "$file" ]; then
+              echo "Extracting $file..."
+              unzip -o "$file" -d extracted_files/
+              # Optional: remove the zip file after extraction
+              # rm "$file"
+            fi
+          done
+
+      - name: Commit uncompressed files back to repo
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Automatically extract uploaded zip archive"
