@@ -19,6 +19,22 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
+    - name: Auto-patch Sender Dependencies
+      run: |
+        SENDER_GRADLE="extracted_files/android/SandorsSender/app/build.gradle"
+        if [ -f "$SENDER_GRADLE" ]; then
+          echo "Checking dependencies in $SENDER_GRADLE..."
+          if ! grep -q "androidx.media:media" "$SENDER_GRADLE"; then
+            echo "Injecting androidx.media dependency for VolumeProviderCompat..."
+            # Safely append the dependency inside the dependencies block
+            sed -i '/dependencies {/a \    implementation "androidx.media:media:1.7.0"' "$SENDER_GRADLE"
+          else
+            echo "androidx.media dependency already present."
+          fi
+        else
+          echo "Warning: Sender build.gradle not found at $SENDER_GRADLE"
+        fi
+
     - name: Grant execute permission for Gradle wrappers
       run: |
         chmod +x extracted_files/android/SandorsReceiver/gradlew
@@ -36,10 +52,10 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: SandorsReceiver-debug
-        path: extracted_files/android/SandorsReceiver/app/build/outputs/apk/debug/SandorsPortalReceiver.apk
+        path: extracted_files/android/SandorsReceiver/app/build/outputs/apk/debug/app-debug.apk
 
     - name: Upload Pixel Sender Artifact
       uses: actions/upload-artifact@v4
       with:
         name: SandorsSender-debug
-        path: extracted_files/android/SandorsSender/app/build/outputs/apk/debug/SandorsPortalSender.apk
+        path: extracted_files/android/SandorsSender/app/build/outputs/apk/debug/app-debug.apk
