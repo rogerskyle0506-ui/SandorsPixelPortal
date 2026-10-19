@@ -48,6 +48,17 @@ jobs:
           exit 1
         fi
 
+    - name: Debug - Inspect CastForegroundService.kt
+      run: |
+        SERVICE_FILE="extracted_files/android/SandorsSender/app/src/main/java/com/sandors/mirrorcast/sender/cast/CastForegroundService.kt"
+        if [ -f "$SERVICE_FILE" ]; then
+          echo "=== INSPECTING CastForegroundService.kt (Lines 70-105) ==="
+          sed -n '70,105p' "$SERVICE_FILE"
+        else
+          echo "WARNING: CastForegroundService.kt not found at expected path."
+          find extracted_files/android/SandorsSender -name "CastForegroundService.kt"
+        fi
+
     - name: Grant execute permission for Gradle wrappers
       run: |
         set -x
@@ -58,11 +69,23 @@ jobs:
 
     - name: Build Fire Stick Receiver APK (OS 7)
       working-directory: extracted_files/android/SandorsReceiver
-      run: ./gradlew assembleDebug --stacktrace --info
+      run: |
+        echo "=== STARTING RECEIVER BUILD ==="
+        ./gradlew assembleDebug --stacktrace --info || BUILD_FAILED=true
+        if [ "$BUILD_FAILED" = true ]; then
+          echo "❌ RECEIVER BUILD FAILED. Extracting error lines..."
+          exit 1
+        fi
 
     - name: Build Pixel 10 Sender APK
       working-directory: extracted_files/android/SandorsSender
-      run: ./gradlew assembleDebug --stacktrace --info
+      run: |
+        echo "=== STARTING SENDER BUILD ==="
+        ./gradlew assembleDebug --stacktrace --info || BUILD_FAILED=true
+        if [ "$BUILD_FAILED" = true ]; then
+          echo "❌ SENDER BUILD FAILED. Extracting error lines..."
+          exit 1
+        fi
 
     - name: Debug - Verify APK Outputs Exist
       run: |
