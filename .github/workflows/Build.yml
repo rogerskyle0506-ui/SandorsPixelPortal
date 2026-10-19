@@ -21,25 +21,25 @@ jobs:
 
     - name: Grant execute permission for Gradle wrappers
       run: |
-        chmod +x android/SandorsReceiver/gradlew
-        chmod +x android/SandorsSender/gradlew
+        chmod +x extracted_files/android/SandorsReceiver/gradlew
+        chmod +x extracted_files/android/SandorsSender/gradlew
 
     - name: Build Fire Stick Receiver APK (OS 7)
-      working-directory: android/SandorsReceiver
+      working-directory: extracted_files/android/SandorsReceiver
       run: ./gradlew assembleDebug
 
     - name: Build Pixel 10 Sender APK
-      working-directory: android/SandorsSender
+      working-directory: extracted_files/android/SandorsSender
       run: ./gradlew assembleDebug
 
     - name: Upload Fire Stick Receiver Artifact
       uses: actions/upload-artifact@v4
       with:
         name: SandorsReceiver-debug
-        path: android/SandorsReceiver/app/build/outputs/apk/debug/app-debug.apk
+        path: extracted_files/android/SandorsReceiver/app/build/outputs/apk/debug/SandorsPortalReceiver.apk
 
     - name: Upload Pixel Sender Artifact
       uses: actions/upload-artifact@v4
       with:
         name: SandorsSender-debug
-        path: android/SandorsSender/app/build/outputs/apk/debug/app-debug.apk
+        path: extracted_files/android/SandorsSender/app/build/outputs/apk/debug/SandorsPortalSender.apk
