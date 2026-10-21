@@ -1,0 +1,73 @@
+name: Build Android Apps
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-receiver:
+    name: Build SandorsReceiver
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android 34 SDK Platform
+        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Grant execute permission for Gradle wrapper
+        run: chmod +x android/SandorsReceiver/gradlew
+
+      - name: Build SandorsReceiver APK
+        working-directory: android/SandorsReceiver
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload Receiver APK Immediately
+        uses: actions/upload-artifact@v4
+        with:
+          name: receiver-debug-apk
+          path: android/SandorsReceiver/app/build/outputs/apk/debug/app-debug.apk
+
+  build-sender:
+    name: Build SandorsSender
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android 35 SDK Platform
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Grant execute permission for Gradle wrapper
+        run: chmod +x android/SandorsSender/gradlew
+
+      - name: Build SandorsSender APK
+        working-directory: android/SandorsSender
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload Sender APK Immediately
+        uses: actions/upload-artifact@v4
+        with:
+          name: sender-debug-apk
+          path: android/SandorsSender/app/build/outputs/apk/debug/app-debug.apk
