@@ -1,4 +1,4 @@
-name: Build Android Apps with Repo Diagnostics
+name: Build Android Apps with Clean Outcome Logs
 
 on:
   push:
@@ -38,9 +38,54 @@ jobs:
       - name: Grant execute permission for Gradle wrapper
         run: chmod +x android/SandorsReceiver/gradlew
 
-      - name: Build SandorsReceiver APK
+      - name: Build and Generate Outcome Report
         working-directory: android/SandorsReceiver
-        run: ./gradlew assembleDebug --no-daemon --stacktrace --info
+        run: |
+          mkdir -p ../../build-logs
+          
+          # Run gradle and capture raw output
+          ./gradlew assembleDebug --no-daemon --stacktrace --info > gradle_output.tmp 2>&1
+          BUILD_EXIT=$?
+
+          # Clear out ALL old receiver log variants to ensure only one exists
+          rm -f ../../build-logs/receiver-success.txt ../../build-logs/receiver-failure.txt
+
+          if [ $BUILD_EXIT -eq 0 ]; then
+            REPORT_PATH="../../build-logs/receiver-success.txt"
+            STATUS_LABEL="SUCCESS"
+          else
+            REPORT_PATH="../../build-logs/receiver-failure.txt"
+            STATUS_LABEL="FAILED (Exit Code: $BUILD_EXIT)"
+          fi
+
+          # Build the single fresh text report
+          {
+            echo "===================================================="
+            echo " SANDORS RECEIVER - BUILD REPORT: $STATUS_LABEL"
+            echo "===================================================="
+            echo "Timestamp: $(date)"
+            echo ""
+            echo "----------------------------------------------------"
+            echo " 1. SYSTEM & ENVIRONMENT INFORMATION"
+            echo "----------------------------------------------------"
+            uname -a
+            java -version
+            echo ""
+            echo "ANDROID_HOME: $ANDROID_HOME"
+            echo ""
+            echo "----------------------------------------------------"
+            echo " 2. GRADLE & KOTLIN COMPILER BUILD OUTPUT"
+            echo "----------------------------------------------------"
+            cat gradle_output.tmp
+            echo ""
+            echo "----------------------------------------------------"
+            echo " 3. FINAL SUMMARY"
+            echo "----------------------------------------------------"
+            echo "Status: $STATUS_LABEL"
+          } > "$REPORT_PATH"
+
+          rm gradle_output.tmp
+          exit $BUILD_EXIT
 
       - name: Upload Receiver APK Immediately
         uses: actions/upload-artifact@v4
@@ -48,21 +93,14 @@ jobs:
           name: receiver-debug-apk
           path: android/SandorsReceiver/app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Push Debug Logs to Repo Root on Failure
-        if: failure()
+      - name: Sync Clean Logs to Repo Root
+        if: always()
         run: |
-          mkdir -p build-failure-logs/receiver
-          echo "=== SYSTEM & ENVIRONMENT INFO ===" > build-failure-logs/receiver/sys-info.txt
-          uname -a >> build-failure-logs/receiver/sys-info.txt
-          java -version 2>> build-failure-logs/receiver/sys-info.txt
-          
-          find android/SandorsReceiver -name "*.log" -exec cp {} build-failure-logs/receiver/ \; || true
-          
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          git add build-failure-logs/
-          git commit -m "chore: upload receiver build failure logs [skip ci]" || echo "No changes to commit"
+          git add build-logs/
+          git commit -m "chore: update latest receiver build report [skip ci]" || echo "No changes to commit"
           git push
 
   build-sender:
@@ -94,9 +132,52 @@ jobs:
       - name: Grant execute permission for Gradle wrapper
         run: chmod +x android/SandorsSender/gradlew
 
-      - name: Build SandorsSender APK
+      - name: Build and Generate Outcome Report
         working-directory: android/SandorsSender
-        run: ./gradlew assembleDebug --no-daemon --stacktrace --info
+        run: |
+          mkdir -p ../../build-logs
+          
+          ./gradlew assembleDebug --no-daemon --stacktrace --info > gradle_output.tmp 2>&1
+          BUILD_EXIT=$?
+
+          # Clear out ALL old sender log variants to ensure only one exists
+          rm -f ../../build-logs/sender-success.txt ../../build-logs/sender-failure.txt
+
+          if [ $BUILD_EXIT -eq 0 ]; then
+            REPORT_PATH="../../build-logs/sender-success.txt"
+            STATUS_LABEL="SUCCESS"
+          else
+            REPORT_PATH="../../build-logs/sender-failure.txt"
+            STATUS_LABEL="FAILED (Exit Code: $BUILD_EXIT)"
+          fi
+
+          {
+            echo "===================================================="
+            echo " SANDORS SENDER - BUILD REPORT: $STATUS_LABEL"
+            echo "===================================================="
+            echo "Timestamp: $(date)"
+            echo ""
+            echo "----------------------------------------------------"
+            echo " 1. SYSTEM & ENVIRONMENT INFORMATION"
+            echo "----------------------------------------------------"
+            uname -a
+            java -version
+            echo ""
+            echo "ANDROID_HOME: $ANDROID_HOME"
+            echo ""
+            echo "----------------------------------------------------"
+            echo " 2. GRADLE & KOTLIN COMPILER BUILD OUTPUT"
+            echo "----------------------------------------------------"
+            cat gradle_output.tmp
+            echo ""
+            echo "----------------------------------------------------"
+            echo " 3. FINAL SUMMARY"
+            echo "----------------------------------------------------"
+            echo "Status: $STATUS_LABEL"
+          } > "$REPORT_PATH"
+
+          rm gradle_output.tmp
+          exit $BUILD_EXIT
 
       - name: Upload Sender APK Immediately
         uses: actions/upload-artifact@v4
@@ -104,19 +185,12 @@ jobs:
           name: sender-debug-apk
           path: android/SandorsSender/app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Push Debug Logs to Repo Root on Failure
-        if: failure()
+      - name: Sync Clean Logs to Repo Root
+        if: always()
         run: |
-          mkdir -p build-failure-logs/sender
-          echo "=== SYSTEM & ENVIRONMENT INFO ===" > build-failure-logs/sender/sys-info.txt
-          uname -a >> build-failure-logs/sender/sys-info.txt
-          java -version 2>> build-failure-logs/sender/sys-info.txt
-          
-          find android/SandorsSender -name "*.log" -exec cp {} build-failure-logs/sender/ \; || true
-          
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          git add build-failure-logs/
-          git commit -m "chore: upload sender build failure logs [skip ci]" || echo "No changes to commit"
+          git add build-logs/
+          git commit -m "chore: update latest sender build report [skip ci]" || echo "No changes to commit"
           git push
