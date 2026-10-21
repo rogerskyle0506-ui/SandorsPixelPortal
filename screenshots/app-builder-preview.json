@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Sandors Mirrorcast",
+      "hasCanvas": false,
+      "bodyTextLen": 383,
+      "bodyTextHash": "93b584838cb38a45e0483f99ebfa3be64ccc0b8a58f73ffd3d99cec93675fa42",
+      "bodyTextPrefix": "SANDORS Mirrorcast Tiles Pixel 10 · sender Idle Find the Fire St",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Sandors Mirrorcast",
+      "hasCanvas": false,
+      "bodyTextLen": 247,
+      "bodyTextHash": "2db927b858a15a3d94983de969e5b0daa61bdb74dc74abf620d92b2f322a6489",
+      "bodyTextPrefix": "SANDORS Mirrorcast Tiles Pixel 10 · sender Idle Find the Fire St",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}
