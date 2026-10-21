@@ -1,0 +1,60 @@
+name: Extract Grok Workspace to Root
+
+on:
+  workflow_dispatch:
+
+jobs:
+  unzip-and-replace:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract zip and flatten to root
+        run: |
+          ZIP_FILE="grok-workspace.zip"
+          
+          if [ ! -f "$ZIP_FILE" ]; then
+            echo "Error: $ZIP_FILE not found."
+            exit 1
+          fi
+
+          # Create temp directory and extract
+          mkdir -p temp_extracted
+          unzip -q "$ZIP_FILE" -d temp_extracted
+          
+          cd temp_extracted
+          
+          # If the zip wraps everything in a single root folder, unwrap it; otherwise move contents directly
+          if [ $(ls -A | wc -l) -eq 1 ] && [ -d "$(ls -A)" ]; then
+            SINGLE_DIR=$(ls -A)
+            echo "Unwrapping single root folder: $SINGLE_DIR"
+            cp -r "$SINGLE_DIR"/* ../
+            cp -r "$SINGLE_DIR"/.[^.]* ../ 2>/dev/null || true
+          else
+            cp -r ./* ../
+            cp -r ./.?[^.]* ../ 2>/dev/null || true
+          fi
+          
+          cd ..
+          
+          # Clean up the zip file and temp directory
+          rm -rf temp_extracted "$ZIP_FILE"
+          
+          # Optional: Remove the workflow folder itself so it acts fully like the original repo
+          rm -rf .github
+
+      - name: Commit and push clean repo structure
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add -A
+          git status
+          
+          if git diff-index --quiet HEAD --; then
+            echo "No changes to commit."
+          else
+            git commit -m "Replace root with contents of grok-workspace.zip"
+            git push
+          fi
