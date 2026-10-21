@@ -1,9 +1,12 @@
-name: Build Android Apps
+name: Build Android Apps with Repo Diagnostics
 
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build-receiver:
@@ -13,31 +16,54 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
+        with:
+          accept-android-sdk-licenses: true
 
       - name: Install Android 34 SDK Platform
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platforms;android-34" "build-tools;34.0.0"
 
       - name: Grant execute permission for Gradle wrapper
         run: chmod +x android/SandorsReceiver/gradlew
 
       - name: Build SandorsReceiver APK
         working-directory: android/SandorsReceiver
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --no-daemon --stacktrace --info
 
       - name: Upload Receiver APK Immediately
         uses: actions/upload-artifact@v4
         with:
           name: receiver-debug-apk
           path: android/SandorsReceiver/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Push Debug Logs to Repo Root on Failure
+        if: failure()
+        run: |
+          mkdir -p build-failure-logs/receiver
+          echo "=== SYSTEM & ENVIRONMENT INFO ===" > build-failure-logs/receiver/sys-info.txt
+          uname -a >> build-failure-logs/receiver/sys-info.txt
+          java -version 2>> build-failure-logs/receiver/sys-info.txt
+          
+          find android/SandorsReceiver -name "*.log" -exec cp {} build-failure-logs/receiver/ \; || true
+          
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add build-failure-logs/
+          git commit -m "chore: upload receiver build failure logs [skip ci]" || echo "No changes to commit"
+          git push
 
   build-sender:
     name: Build SandorsSender
@@ -46,28 +72,51 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
+        with:
+          accept-android-sdk-licenses: true
 
       - name: Install Android 35 SDK Platform
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Grant execute permission for Gradle wrapper
         run: chmod +x android/SandorsSender/gradlew
 
       - name: Build SandorsSender APK
         working-directory: android/SandorsSender
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --no-daemon --stacktrace --info
 
       - name: Upload Sender APK Immediately
         uses: actions/upload-artifact@v4
         with:
           name: sender-debug-apk
           path: android/SandorsSender/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Push Debug Logs to Repo Root on Failure
+        if: failure()
+        run: |
+          mkdir -p build-failure-logs/sender
+          echo "=== SYSTEM & ENVIRONMENT INFO ===" > build-failure-logs/sender/sys-info.txt
+          uname -a >> build-failure-logs/sender/sys-info.txt
+          java -version 2>> build-failure-logs/sender/sys-info.txt
+          
+          find android/SandorsSender -name "*.log" -exec cp {} build-failure-logs/sender/ \; || true
+          
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add build-failure-logs/
+          git commit -m "chore: upload sender build failure logs [skip ci]" || echo "No changes to commit"
+          git push
