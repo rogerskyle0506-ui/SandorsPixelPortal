@@ -1,0 +1,59 @@
+name: Build Sandors MirrorCast APKs
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  build:
+    name: Build Android APKs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x android/gradlew || chmod +x gradlew
+
+      - name: Build SandorsReceiver APK
+        run: |
+          if [ -f "android/gradlew" ]; then
+            cd android && ./gradlew :SandorsReceiver:assembleDebug --stacktrace
+          else
+            ./gradlew :SandorsReceiver:assembleDebug --stacktrace
+          fi
+
+      - name: Build SandorsSender APK
+        run: |
+          if [ -f "android/gradlew" ]; then
+            cd android && ./gradlew :SandorsSender:assembleDebug --stacktrace
+          else
+            ./gradlew :SandorsSender:assembleDebug --stacktrace
+          fi
+
+      - name: Upload Receiver APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SandorsReceiver-Debug-APK
+          path: |
+            android/SandorsReceiver/app/build/outputs/apk/debug/*.apk
+            SandorsReceiver/app/build/outputs/apk/debug/*.apk
+
+      - name: Upload Sender APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SandorsSender-Debug-APK
+          path: |
+            android/SandorsSender/app/build/outputs/apk/debug/*.apk
+            SandorsSender/app/build/outputs/apk/debug/*.apk
