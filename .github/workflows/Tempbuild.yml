@@ -98,15 +98,14 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git stash --include-untracked
-          git pull --rebase origin main
-          git stash pop || true
+          git pull --rebase origin main || git rebase --abort
           git add build-logs/
           git commit -m "chore: update latest receiver build report [skip ci]" || echo "No changes to commit"
           git push origin main
 
   build-sender:
     name: Build SandorsSender
+    needs: build-receiver
     runs-on: ubuntu-latest
 
     steps:
@@ -159,7 +158,7 @@ jobs:
             echo "----------------------------------------------------"
           } > "$REPORT_TEMP"
 
-          ./gradlew assembleDebug --no-daemon --stacktrace --info >> "$REPORT_TEMP" 2>&1
+          ./gradlew assembleDebug --no-daemon --stacktrace --info >> "$REPORT_TEMP` 2>&1
           BUILD_EXIT=$?
 
           {
@@ -194,9 +193,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git stash --include-untracked
-          git pull --rebase origin main
-          git stash pop || true
+          git pull --rebase origin main || git rebase --abort
           git add build-logs/
           git commit -m "chore: update latest sender build report [skip ci]" || echo "No changes to commit"
           git push origin main
