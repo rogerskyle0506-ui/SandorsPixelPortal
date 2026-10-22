@@ -98,7 +98,9 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git stash
           git pull --rebase origin main || git rebase --abort
+          git stash pop || true
           git add build-logs/
           git commit -m "chore: update latest receiver build report [skip ci]" || echo "No changes to commit"
           git push origin main
@@ -158,7 +160,7 @@ jobs:
             echo "----------------------------------------------------"
           } > "$REPORT_TEMP"
 
-          ./gradlew assembleDebug --no-daemon --stacktrace --info >> "$REPORT_TEMP` 2>&1
+          ./gradlew assembleDebug --no-daemon --stacktrace --info >> "$REPORT_TEMP" 2>&1
           BUILD_EXIT=$?
 
           {
@@ -193,7 +195,9 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git stash
           git pull --rebase origin main || git rebase --abort
+          git stash pop || true
           git add build-logs/
           git commit -m "chore: update latest sender build report [skip ci]" || echo "No changes to commit"
           git push origin main
