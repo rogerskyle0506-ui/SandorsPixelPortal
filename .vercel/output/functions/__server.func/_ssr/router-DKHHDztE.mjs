@@ -3,8 +3,8 @@ import { a as require_jsx_runtime, o as require_react } from "../_libs/@radix-ui
 import { _ as createFileRoute, d as Scripts, f as HeadContent, g as lazyRouteComponent, h as Outlet, m as createRouter, v as createRootRoute, y as useRouter } from "../_libs/@tanstack/react-router+[...].mjs";
 import { i as TriangleAlert } from "../_libs/lucide-react.mjs";
 import { a as union, i as string, n as number, r as object, t as literal } from "../_libs/zod.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-Cbm0GHaW.js
-var router_Cbm0GHaW_exports = /* @__PURE__ */ __exportAll({ getRouter: () => getRouter });
+//#region node_modules/.nitro/vite/services/ssr/assets/router-DKHHDztE.js
+var router_DKHHDztE_exports = /* @__PURE__ */ __exportAll({ getRouter: () => getRouter });
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var FALLBACK_MESSAGE = "An unexpected error occurred. Try reloading the page.";
@@ -332,7 +332,7 @@ function PreviewHostBridge() {
 	}, [router]);
 	return null;
 }
-var styles_default = "/assets/styles-C8J2efpR.css";
+var styles_default = "/assets/styles-D3ec97_e.css";
 var Route$1 = createRootRoute({
 	head: () => ({
 		meta: [
@@ -390,7 +390,7 @@ var Route$1 = createRootRoute({
 		] })]
 	})
 });
-var $$splitComponentImporter = () => import("./routes-Cp9CPOTw.mjs");
+var $$splitComponentImporter = () => import("./routes-z5R-uYNk.mjs");
 var rootRouteChildren = { IndexRoute: createFileRoute("/")({
 	component: lazyRouteComponent($$splitComponentImporter, "component"),
 	head: () => ({ meta: [{ title: "Sandors Mirrorcast" }, {
@@ -411,4 +411,4 @@ function getRouter() {
 	});
 }
 //#endregion
-export { getRouter, router_Cbm0GHaW_exports as t };
+export { getRouter, router_DKHHDztE_exports as t };

@@ -23,6 +23,7 @@ export function Studio() {
   const tab = useCast((s) => s.tab);
   const phase = useCast((s) => s.phase);
   const quality = useCast((s) => s.quality);
+  const latencyMs = useCast((s) => s.latencyMs);
   const setLatency = useCast((s) => s.setLatency);
 
   useEffect(() => {
@@ -42,55 +43,55 @@ export function Studio() {
     return () => window.clearInterval(id);
   }, [phase, setLatency]);
 
-  const session =
-    phase === "connecting" ||
-    phase === "need_pin" ||
-    phase === "consent" ||
-    phase === "casting" ||
-    phase === "paused";
   const pinFirst = phase === "connecting" || phase === "need_pin" || phase === "consent";
+  const live = phase === "casting" || phase === "paused";
+  const both = pinFirst || live;
+  const frame = "min-w-0 flex-col lg:flex lg:h-full lg:min-h-0 lg:overflow-hidden";
+  const pixelClass =
+    tab === "guide"
+      ? "hidden"
+      : both
+        ? `${pinFirst ? "order-2 lg:order-1" : "order-1"} flex ${frame}`
+        : tab === "pixel"
+          ? `order-1 flex ${frame}`
+          : `order-1 hidden ${frame}`;
+  const stickClass =
+    tab === "guide"
+      ? "hidden"
+      : both
+        ? `${pinFirst ? "order-1 lg:order-2" : "order-2"} flex ${frame}`
+        : tab === "stick"
+          ? `order-2 flex ${frame}`
+          : `order-2 hidden ${frame}`;
 
   return (
-    <div className="min-h-screen bg-obsidian text-ink">
-      <StageLoop active={phase === "casting"} paused={phase === "paused"} quality={quality} />
+    <div className="flex h-dvh flex-col overflow-hidden bg-obsidian text-ink">
+      <StageLoop
+        active={phase === "casting" || phase === "paused"}
+        paused={phase === "paused"}
+        quality={quality}
+        latencyMs={latencyMs}
+      />
       <Header />
-      <main className="mx-auto grid w-full max-w-6xl gap-4 px-4 pb-32 lg:grid-cols-2 lg:px-6 lg:pb-6">
-        <section
-          className={
-            tab === "guide"
-              ? "hidden"
-              : session
-                ? pinFirst
-                  ? "order-2 block lg:order-1"
-                  : "order-1 block"
-                : tab === "stick"
-                  ? "hidden lg:block"
-                  : "block"
-          }
-        >
+      <main
+        className={
+          tab === "guide"
+            ? "mx-auto min-h-0 w-full max-w-6xl flex-1 overflow-y-auto px-4 py-3 lg:px-6"
+            : "mx-auto grid min-h-0 w-full max-w-6xl flex-1 grid-cols-1 gap-3 overflow-y-auto px-4 py-3 lg:grid-cols-2 lg:overflow-hidden lg:px-6"
+        }
+      >
+        <section className={pixelClass}>
           <PixelPanel />
         </section>
-        <section
-          className={
-            tab === "guide"
-              ? "hidden"
-              : session
-                ? pinFirst
-                  ? "order-1 block lg:order-2"
-                  : "order-2 block"
-                : tab === "pixel"
-                  ? "hidden lg:block"
-                  : "block"
-          }
-        >
+        <section className={stickClass}>
           <StickPanel />
         </section>
-        <section className={tab === "guide" ? "lg:col-span-2" : "hidden"}>
+        <section className={tab === "guide" ? "min-w-0" : "hidden"}>
           <GuidePanel />
         </section>
       </main>
       <Shade />
-      <nav className="z-30 border-t border-line bg-obsidian max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 lg:border-t-0">
+      <nav className="z-30 shrink-0 border-t border-line bg-obsidian">
         <div className="mx-auto grid max-w-6xl grid-cols-3 gap-2 px-3 py-2 lg:px-6">
           <TabButton id="pixel" label="Pixel" icon={<Smartphone className="size-5" />} />
           <TabButton id="stick" label="Fire Stick" icon={<Tv className="size-5" />} />
@@ -161,7 +162,7 @@ function PixelPanel() {
   const live = phase === "casting" || phase === "paused";
 
   return (
-    <div className="flex flex-col gap-4 overflow-hidden rounded-card border border-line bg-obsidian-2 p-4">
+    <div className="flex h-auto flex-col gap-4 overflow-y-auto rounded-card border border-line bg-obsidian-2 p-4 lg:h-full">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-semibold text-muted">Pixel 10 · sender</p>
         <p className="text-sm text-blue">
@@ -206,6 +207,9 @@ function PixelPanel() {
             )}
           </div>
           {error && <p className="text-sm text-yellow">{error}</p>}
+          <p className="mt-auto pt-4 text-sm leading-relaxed text-muted">
+            Same Wi-Fi. The Stick shows the code. The phone types it.
+          </p>
         </>
       )}
 
@@ -220,7 +224,7 @@ function PixelPanel() {
             {[0, 1, 2, 3].map((index) => (
               <div
                 key={index}
-                className="flex h-16 items-center justify-center rounded-card bg-obsidian font-display text-3xl font-bold text-yellow"
+                className="flex h-14 items-center justify-center rounded-card border border-line bg-obsidian font-display text-3xl font-bold text-yellow"
               >
                 {entry[index] ?? ""}
               </div>
@@ -304,14 +308,18 @@ function PixelPanel() {
             <Stat label="Bitrate" value={bitrate()} />
             <Stat label="Picture" value={quality} />
           </div>
-          <canvas
-            ref={(node) => {
-              surfaces.source = node;
-            }}
-            width={960}
-            height={540}
-            className="aspect-video w-full rounded-card bg-obsidian"
-          />
+          <div className="sandors-stage h-40 w-full shrink-0">
+            <div className="sandors-frame rounded-card bg-obsidian">
+              <canvas
+                ref={(node) => {
+                  surfaces.source = node;
+                }}
+                width={960}
+                height={540}
+                className="absolute inset-0 h-full w-full"
+              />
+            </div>
+          </div>
           <label className="flex items-center gap-3 text-sm text-muted">
             <Volume2 className="size-5 text-blue" />
             <Slider.Root
@@ -333,7 +341,9 @@ function PixelPanel() {
             </Slider.Root>
             <span className="w-8 text-right text-ink">{volume}</span>
           </label>
-          <NotificationCard />
+          <div className="sticky bottom-0 z-10 bg-obsidian-2 pt-1">
+            <NotificationCard />
+          </div>
         </div>
       )}
     </div>
@@ -451,7 +461,7 @@ function StickPanel() {
   }, [size.width, size.height, live]);
 
   return (
-    <div className={`flex flex-col overflow-hidden rounded-card border border-line bg-obsidian-3 ${live ? "min-h-[28rem]" : "min-h-[16rem]"}`}>
+    <div className="flex min-h-64 flex-col overflow-hidden rounded-card border border-line bg-obsidian-3 lg:h-full lg:min-h-0">
       <div className="flex items-center justify-between px-4 py-3">
         <p className="text-sm font-semibold text-muted">Fire Stick · receiver</p>
         <p className="flex items-center gap-2 text-sm text-yellow">
@@ -459,16 +469,28 @@ function StickPanel() {
           {target?.name ?? "Sandors-A1F3"}
         </p>
       </div>
-      <div className="relative mx-4 mb-4 flex flex-1 flex-col items-center justify-center overflow-hidden rounded-card bg-obsidian">
+      <div
+        className={
+          live
+            ? "sandors-stage relative mx-4 mb-4 aspect-video w-full lg:aspect-auto lg:min-h-0 lg:flex-1"
+            : "relative mx-4 mb-4 flex min-h-48 flex-1 flex-col items-center justify-center overflow-hidden rounded-card bg-obsidian"
+        }
+      >
         {live ? (
-          <canvas
-            ref={(node) => {
-              surfaces.tv = node;
-            }}
-            width={size.width}
-            height={size.height}
-            className="aspect-video w-full"
-          />
+          <div className="sandors-frame rounded-card bg-obsidian">
+            <canvas
+              ref={(node) => {
+                surfaces.tv = node;
+              }}
+              width={size.width}
+              height={size.height}
+              className="absolute inset-0 h-full w-full"
+            />
+            {phase === "paused" && <div className="absolute inset-0 bg-obsidian/50" />}
+            <p className="absolute bottom-3 left-3 z-10 rounded-full bg-obsidian/80 px-3 py-1 text-sm font-semibold text-yellow">
+              {phase === "paused" ? "Paused" : `Live · ${quality}`}
+            </p>
+          </div>
         ) : phase === "need_pin" ? (
           <div className="flex flex-col items-center px-6 py-10 text-center">
             <p className="text-sm font-bold tracking-widest text-blue">ENTER THIS CODE ON YOUR PIXEL</p>
@@ -485,6 +507,13 @@ function StickPanel() {
           </div>
         ) : phase === "connecting" ? (
           <p className="px-6 py-16 text-center text-base text-ink">A Pixel is asking to pair.</p>
+        ) : phase === "scanning" ? (
+          <div className="flex flex-col items-center px-6 py-16 text-center">
+            <p className="font-display text-3xl font-bold">Answering the scan</p>
+            <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted">
+              Sandors-A1F3 and Sandors-9C20 are on this Wi-Fi. Pick one on the Pixel.
+            </p>
+          </div>
         ) : (
           <div className="flex flex-col items-center px-6 py-16 text-center">
             <p className="font-display text-3xl font-bold">Waiting for a Pixel</p>
@@ -492,11 +521,6 @@ function StickPanel() {
               Advertising sandorscast on the LAN. The code appears here when a phone connects.
             </p>
           </div>
-        )}
-        {live && (
-          <p className="absolute top-3 right-3 rounded-full bg-obsidian/80 px-3 py-1 text-sm font-semibold text-yellow">
-            {phase === "paused" ? "Paused" : `Live · ${quality}`}
-          </p>
         )}
       </div>
     </div>

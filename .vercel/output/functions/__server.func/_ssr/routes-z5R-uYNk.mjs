@@ -3,7 +3,7 @@ import { a as require_jsx_runtime, o as require_react } from "../_libs/@radix-ui
 import { a as Square, c as Radio, d as Download, f as ChevronDown, l as Play, n as Volume2, o as Smartphone, p as Cast, r as Tv, s as SkipForward, t as Wifi, u as Pause } from "../_libs/lucide-react.mjs";
 import { i as SliderTrack, n as SliderRange, r as SliderThumb, t as Slider } from "../_libs/@radix-ui/react-slider+[...].mjs";
 import { t as create } from "../_libs/zustand.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-Cp9CPOTw.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-z5R-uYNk.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var ROOM = [{
@@ -208,54 +208,133 @@ var surfaces = {
 	source: null,
 	tv: null
 };
-function drawSource(canvas, now, reduce) {
+function drawScreen(canvas, now, lagMs, reduce) {
 	const ctx = canvas.getContext("2d");
 	if (!ctx) return;
 	const w = canvas.width;
 	const h = canvas.height;
+	const s = h / 540;
+	const t = reduce ? 0 : now - lagMs;
+	ctx.clearRect(0, 0, w, h);
 	ctx.fillStyle = "#0b0f19";
 	ctx.fillRect(0, 0, w, h);
-	const drift = reduce ? 0 : now / 18 % w;
-	ctx.strokeStyle = "#3b82ff";
+	ctx.save();
 	ctx.globalAlpha = .85;
-	ctx.lineWidth = 3;
+	ctx.strokeStyle = "#3b82ff";
+	ctx.lineWidth = Math.max(2, 3 * s);
+	const drift = reduce ? w * .12 : t / 26 % (w + 120) - 60;
 	ctx.beginPath();
-	ctx.moveTo(-40 + drift, h * .72);
-	ctx.lineTo(w * .35 + drift * .2, h * .28);
-	ctx.lineTo(w * .62, h * .58);
+	ctx.moveTo(drift, h * .96);
+	ctx.lineTo(drift + w * .22, h * .22);
+	ctx.lineTo(drift + w * .4, h * .52);
 	ctx.stroke();
 	ctx.strokeStyle = "#ff3344";
-	ctx.lineWidth = 8;
+	ctx.lineWidth = Math.max(4, 8 * s);
 	ctx.beginPath();
-	ctx.arc(w * .78, h * .34, 54, .2, 1.4);
+	ctx.arc(w * .84, h * .2, 46 * s, .2, 1.45);
 	ctx.stroke();
-	ctx.globalAlpha = 1;
+	ctx.restore();
 	ctx.fillStyle = "#f0c14b";
-	ctx.fillRect(36, 36, 18, 4);
+	ctx.fillRect(28 * s, 22 * s, 18 * s, 4 * s);
+	ctx.fillStyle = "#f3efe6";
+	ctx.font = `600 ${Math.round(15 * s)}px Manrope, sans-serif`;
+	ctx.textAlign = "left";
+	ctx.fillText("Pixel 10", 28 * s, 48 * s);
+	ctx.fillStyle = "#9aa3b5";
+	ctx.font = `500 ${Math.round(15 * s)}px Manrope, sans-serif`;
+	ctx.textAlign = "right";
+	ctx.fillText("Home  ·  86%", w - 28 * s, 48 * s);
 	const clock = /* @__PURE__ */ new Date();
 	const hh = String(clock.getHours()).padStart(2, "0");
 	const mm = String(clock.getMinutes()).padStart(2, "0");
+	const day = [
+		"Sunday",
+		"Monday",
+		"Tuesday",
+		"Wednesday",
+		"Thursday",
+		"Friday",
+		"Saturday"
+	][clock.getDay()];
+	ctx.textAlign = "left";
 	ctx.fillStyle = "#f3efe6";
-	ctx.font = "600 72px Manrope, sans-serif";
-	ctx.fillText(`${hh}:${mm}`, 36, h * .62);
+	ctx.font = `700 ${Math.round(84 * s)}px Syne, sans-serif`;
+	ctx.fillText(`${hh}:${mm}`, 28 * s, h * .42);
 	ctx.fillStyle = "#9aa3b5";
-	ctx.font = "500 18px Manrope, sans-serif";
-	ctx.fillText("PIXEL 10  ·  SCREEN", 40, h * .62 + 32);
+	ctx.font = `500 ${Math.round(16 * s)}px Manrope, sans-serif`;
+	ctx.fillText(`${day}  ·  screen capture`, 32 * s, h * .42 + 28 * s);
+	const cardX = w * .56;
+	const cardW = w * .38;
+	roundRect(ctx, cardX, h * .22, cardW, h * .22, 16 * s, "#121826");
+	ctx.fillStyle = "#f0c14b";
+	ctx.fillRect(cardX + 16 * s, h * .22 + 16 * s, 28 * s, 4 * s);
+	ctx.fillStyle = "#f3efe6";
+	ctx.font = `600 ${Math.round(18 * s)}px Manrope, sans-serif`;
+	ctx.fillText("Living room", cardX + 16 * s, h * .22 + 48 * s);
+	ctx.fillStyle = "#9aa3b5";
+	ctx.font = `500 ${Math.round(14 * s)}px Manrope, sans-serif`;
+	ctx.fillText("Stick is on the LAN", cardX + 16 * s, h * .22 + 72 * s);
+	const playY = h * .5;
+	roundRect(ctx, cardX, playY, cardW, h * .28, 16 * s, "#121826");
+	ctx.fillStyle = "#3b82ff";
+	ctx.beginPath();
+	ctx.arc(cardX + 28 * s, playY + 28 * s, 8 * s, 0, Math.PI * 2);
+	ctx.fill();
+	ctx.fillStyle = "#f3efe6";
+	ctx.font = `600 ${Math.round(18 * s)}px Manrope, sans-serif`;
+	ctx.fillText("Night drive", cardX + 46 * s, playY + 34 * s);
+	ctx.fillStyle = "#9aa3b5";
+	ctx.font = `500 ${Math.round(14 * s)}px Manrope, sans-serif`;
+	ctx.fillText("System audio", cardX + 16 * s, playY + 64 * s);
+	const progress = reduce ? .4 : t / 9e3 % 1;
+	const barX = cardX + 16 * s;
+	const barW = cardW - 32 * s;
+	const barY = playY + h * .28 - 28 * s;
+	ctx.fillStyle = "#243044";
+	roundRect(ctx, barX, barY, barW, 6 * s, 3 * s, "#243044");
+	ctx.fillStyle = "#3b82ff";
+	roundRect(ctx, barX, barY, Math.max(6 * s, barW * progress), 6 * s, 3 * s, "#3b82ff");
+	const dockY = h * .84;
+	const icons = [
+		"#ff3344",
+		"#3b82ff",
+		"#f0c14b",
+		"#243044"
+	];
+	const gap = 16 * s;
+	const icon = 36 * s;
+	const dockW = icons.length * icon + (icons.length - 1) * gap + 28 * s;
+	roundRect(ctx, 28 * s, dockY, dockW, 52 * s, 18 * s, "#121826");
+	icons.forEach((color, index) => {
+		ctx.fillStyle = color;
+		roundRect(ctx, 42 * s + index * (icon + gap), dockY + 8 * s, icon, icon, 10 * s, color);
+	});
 }
-function StageLoop({ active, paused, quality }) {
+function roundRect(ctx, x, y, w, h, r, fill) {
+	const radius = Math.min(r, w / 2, h / 2);
+	ctx.beginPath();
+	ctx.moveTo(x + radius, y);
+	ctx.arcTo(x + w, y, x + w, y + h, radius);
+	ctx.arcTo(x + w, y + h, x, y + h, radius);
+	ctx.arcTo(x, y + h, x, y, radius);
+	ctx.arcTo(x, y, x + w, y, radius);
+	ctx.closePath();
+	ctx.fillStyle = fill;
+	ctx.fill();
+}
+function StageLoop({ active, paused, quality, latencyMs }) {
 	(0, import_react.useEffect)(() => {
 		const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 		let frame = 0;
-		let lastCopy = 0;
+		let lastTv = 0;
 		const tick = (now) => {
 			const source = surfaces.source;
-			if (source) drawSource(source, now, reduce);
+			if (source) drawScreen(source, now, 0, reduce);
 			const tv = surfaces.tv;
-			const interval = quality === "1080p60" ? 16 : 34;
-			if (tv && source && active && !paused && now - lastCopy >= interval) {
-				lastCopy = now;
-				const ctx = tv.getContext("2d");
-				if (ctx) ctx.drawImage(source, 0, 0, tv.width, tv.height);
+			const interval = quality === "1080p60" ? 16 : 33;
+			if (tv && active && !paused && now - lastTv >= interval) {
+				lastTv = now;
+				drawScreen(tv, now, reduce ? 0 : latencyMs, reduce);
 			}
 			frame = requestAnimationFrame(tick);
 		};
@@ -264,7 +343,8 @@ function StageLoop({ active, paused, quality }) {
 	}, [
 		active,
 		paused,
-		quality
+		quality,
+		latencyMs
 	]);
 	return null;
 }
@@ -293,6 +373,7 @@ function Studio() {
 	const tab = useCast((s) => s.tab);
 	const phase = useCast((s) => s.phase);
 	const quality = useCast((s) => s.quality);
+	const latencyMs = useCast((s) => s.latencyMs);
 	const setLatency = useCast((s) => s.setLatency);
 	(0, import_react.useEffect)(() => {
 		try {
@@ -307,37 +388,39 @@ function Studio() {
 		}, 900);
 		return () => window.clearInterval(id);
 	}, [phase, setLatency]);
-	const session = phase === "connecting" || phase === "need_pin" || phase === "consent" || phase === "casting" || phase === "paused";
 	const pinFirst = phase === "connecting" || phase === "need_pin" || phase === "consent";
+	const both = pinFirst || phase === "casting" || phase === "paused";
+	const frame = "min-w-0 flex-col lg:flex lg:h-full lg:min-h-0 lg:overflow-hidden";
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen bg-obsidian text-ink",
+		className: "flex h-dvh flex-col overflow-hidden bg-obsidian text-ink",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StageLoop, {
-				active: phase === "casting",
+				active: phase === "casting" || phase === "paused",
 				paused: phase === "paused",
-				quality
+				quality,
+				latencyMs
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header, {}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
-				className: "mx-auto grid w-full max-w-6xl gap-4 px-4 pb-32 lg:grid-cols-2 lg:px-6 lg:pb-6",
+				className: tab === "guide" ? "mx-auto min-h-0 w-full max-w-6xl flex-1 overflow-y-auto px-4 py-3 lg:px-6" : "mx-auto grid min-h-0 w-full max-w-6xl flex-1 grid-cols-1 gap-3 overflow-y-auto px-4 py-3 lg:grid-cols-2 lg:overflow-hidden lg:px-6",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
-						className: tab === "guide" ? "hidden" : session ? pinFirst ? "order-2 block lg:order-1" : "order-1 block" : tab === "stick" ? "hidden lg:block" : "block",
+						className: tab === "guide" ? "hidden" : both ? `${pinFirst ? "order-2 lg:order-1" : "order-1"} flex ${frame}` : tab === "pixel" ? `order-1 flex ${frame}` : `order-1 hidden ${frame}`,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PixelPanel, {})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
-						className: tab === "guide" ? "hidden" : session ? pinFirst ? "order-1 block lg:order-2" : "order-2 block" : tab === "pixel" ? "hidden lg:block" : "block",
+						className: tab === "guide" ? "hidden" : both ? `${pinFirst ? "order-1 lg:order-2" : "order-2"} flex ${frame}` : tab === "stick" ? `order-2 flex ${frame}` : `order-2 hidden ${frame}`,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StickPanel, {})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
-						className: tab === "guide" ? "lg:col-span-2" : "hidden",
+						className: tab === "guide" ? "min-w-0" : "hidden",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GuidePanel, {})
 					})
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shade, {}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", {
-				className: "z-30 border-t border-line bg-obsidian max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 lg:border-t-0",
+				className: "z-30 shrink-0 border-t border-line bg-obsidian",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "mx-auto grid max-w-6xl grid-cols-3 gap-2 px-3 py-2 lg:px-6",
 					children: [
@@ -422,7 +505,7 @@ function PixelPanel() {
 	const pairing = phase === "connecting" || phase === "need_pin";
 	const live = phase === "casting" || phase === "paused";
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "flex flex-col gap-4 overflow-hidden rounded-card border border-line bg-obsidian-2 p-4",
+		className: "flex h-auto flex-col gap-4 overflow-y-auto rounded-card border border-line bg-obsidian-2 p-4 lg:h-full",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center justify-between gap-3",
@@ -467,6 +550,10 @@ function PixelPanel() {
 				error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "text-sm text-yellow",
 					children: error
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "mt-auto pt-4 text-sm leading-relaxed text-muted",
+					children: "Same Wi-Fi. The Stick shows the code. The phone types it."
 				})
 			] }),
 			pairing && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -484,7 +571,7 @@ function PixelPanel() {
 							2,
 							3
 						].map((index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "flex h-16 items-center justify-center rounded-card bg-obsidian font-display text-3xl font-bold text-yellow",
+							className: "flex h-14 items-center justify-center rounded-card border border-line bg-obsidian font-display text-3xl font-bold text-yellow",
 							children: entry[index] ?? ""
 						}, index))
 					}),
@@ -591,13 +678,19 @@ function PixelPanel() {
 							})
 						]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("canvas", {
-						ref: (node) => {
-							surfaces.source = node;
-						},
-						width: 960,
-						height: 540,
-						className: "aspect-video w-full rounded-card bg-obsidian"
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "sandors-stage h-40 w-full shrink-0",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "sandors-frame rounded-card bg-obsidian",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("canvas", {
+								ref: (node) => {
+									surfaces.source = node;
+								},
+								width: 960,
+								height: 540,
+								className: "absolute inset-0 h-full w-full"
+							})
+						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
 						className: "flex items-center gap-3 text-sm text-muted",
@@ -624,7 +717,10 @@ function PixelPanel() {
 							})
 						]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NotificationCard, {})
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "sticky bottom-0 z-10 bg-obsidian-2 pt-1",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NotificationCard, {})
+					})
 				]
 			})
 		]
@@ -736,7 +832,7 @@ function StickPanel() {
 		live
 	]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: `flex flex-col overflow-hidden rounded-card border border-line bg-obsidian-3 ${live ? "min-h-[28rem]" : "min-h-[16rem]"}`,
+		className: "flex min-h-64 flex-col overflow-hidden rounded-card border border-line bg-obsidian-3 lg:h-full lg:min-h-0",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "flex items-center justify-between px-4 py-3",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
@@ -746,15 +842,25 @@ function StickPanel() {
 				className: "flex items-center gap-2 text-sm text-yellow",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Radio, { className: phase === "idle" || phase === "scanning" ? "size-4 text-blue" : "sandors-pulse size-4 text-red" }), target?.name ?? "Sandors-A1F3"]
 			})]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "relative mx-4 mb-4 flex flex-1 flex-col items-center justify-center overflow-hidden rounded-card bg-obsidian",
-			children: [live ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("canvas", {
-				ref: (node) => {
-					surfaces.tv = node;
-				},
-				width: size.width,
-				height: size.height,
-				className: "aspect-video w-full"
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: live ? "sandors-stage relative mx-4 mb-4 aspect-video w-full lg:aspect-auto lg:min-h-0 lg:flex-1" : "relative mx-4 mb-4 flex min-h-48 flex-1 flex-col items-center justify-center overflow-hidden rounded-card bg-obsidian",
+			children: live ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "sandors-frame rounded-card bg-obsidian",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("canvas", {
+						ref: (node) => {
+							surfaces.tv = node;
+						},
+						width: size.width,
+						height: size.height,
+						className: "absolute inset-0 h-full w-full"
+					}),
+					phase === "paused" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-obsidian/50" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "absolute bottom-3 left-3 z-10 rounded-full bg-obsidian/80 px-3 py-1 text-sm font-semibold text-yellow",
+						children: phase === "paused" ? "Paused" : `Live · ${quality}`
+					})
+				]
 			}) : phase === "need_pin" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex flex-col items-center px-6 py-10 text-center",
 				children: [
@@ -790,6 +896,15 @@ function StickPanel() {
 			}) : phase === "connecting" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "px-6 py-16 text-center text-base text-ink",
 				children: "A Pixel is asking to pair."
+			}) : phase === "scanning" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex flex-col items-center px-6 py-16 text-center",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "font-display text-3xl font-bold",
+					children: "Answering the scan"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "mt-3 max-w-sm text-sm leading-relaxed text-muted",
+					children: "Sandors-A1F3 and Sandors-9C20 are on this Wi-Fi. Pick one on the Pixel."
+				})]
 			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex flex-col items-center px-6 py-16 text-center",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
@@ -799,10 +914,7 @@ function StickPanel() {
 					className: "mt-3 max-w-sm text-sm leading-relaxed text-muted",
 					children: "Advertising sandorscast on the LAN. The code appears here when a phone connects."
 				})]
-			}), live && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "absolute top-3 right-3 rounded-full bg-obsidian/80 px-3 py-1 text-sm font-semibold text-yellow",
-				children: phase === "paused" ? "Paused" : `Live · ${quality}`
-			})]
+			})
 		})]
 	});
 }
