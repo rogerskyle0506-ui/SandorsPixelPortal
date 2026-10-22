@@ -1,0 +1,74 @@
+name: Auto-Unzip and Clean Root on Upload
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  unzip-and-clean:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect Zip File in Root
+        id: find-zip
+        run: |
+          ZIP_FILE=$(find . -maxdepth 1 -name "*.zip" | head -n 1)
+          if [ -n "$ZIP_FILE" ]; then
+            echo "zip_file=$(basename "$ZIP_FILE")" >> $GITHUB_OUTPUT
+            echo "has_zip=true" >> $GITHUB_OUTPUT
+            echo "Found zip file: $(basename "$ZIP_FILE")"
+          else
+            echo "has_zip=false" >> $GITHUB_OUTPUT
+            echo "No zip file detected. Skipping extraction."
+          fi
+
+      - name: Process and Replace Root Contents
+        if: steps.find-zip.outputs.has_zip == 'true'
+        run: |
+          ZIP_NAME="${{ steps.find-zip.outputs.zip_file }}"
+          
+          # 1. Unzip into a temporary staging folder outside the repo
+          mkdir -p /tmp/extracted_content
+          unzip -q "$ZIP_NAME" -d /tmp/extracted_content/
+
+          # 2. Check if the zip contains a single top-level wrapper folder
+          cd /tmp/extracted_content
+          ITEMS=( *)
+          if [ ${#ITEMS[@]} -eq 1 ] && [ -d "${ITEMS[0]}" ]; then
+            echo "Stripping outer wrapper folder: ${ITEMS[0]}"
+            SOURCE_DIR="/tmp/extracted_content/${ITEMS[0]}"
+          else
+            SOURCE_DIR="/tmp/extracted_content"
+          fi
+
+          # 3. Return to repo root and clean everything EXCEPT .git, .github, and the zip file
+          cd ${{ github.workspace }}
+          echo "Cleaning old files from repository root..."
+          find . -maxdepth 1 ! -name '.' ! -name '..' ! -name '.git' ! -name '.github' ! -name "$ZIP_NAME" -exec rm -rf {} +
+
+          # 4. Copy new extracted contents directly into the root
+          echo "Placing new files into root..."
+          cp -a "$SOURCE_DIR/." ./
+
+          # 5. Remove the zip file from the repository
+          rm -f "$ZIP_NAME"
+
+          # Cleanup temp folder
+          rm -rf /tmp/extracted_content
+
+      - name: Commit and Push Clean Structure
+        if: steps.find-zip.outputs.has_zip == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git add -A
+          if git diff-index --quiet HEAD --; then
+            echo "No changes to commit."
+          else
+            git commit -m "Auto-clean root and unpack zip archive [skip ci]"
+            git push
+          fi
