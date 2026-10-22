@@ -44,7 +44,6 @@ jobs:
           mkdir -p ../../build-logs
           REPORT_TEMP="../../build-logs/receiver-build-temp.txt"
           
-          # 1. Write headers and system info directly to the temporary report
           {
             echo "===================================================="
             echo " SANDORS RECEIVER - BUILD DIAGNOSTICS"
@@ -64,11 +63,9 @@ jobs:
             echo "----------------------------------------------------"
           } > "$REPORT_TEMP"
 
-          # 2. Run Gradle and append ALL stdout/stderr live into the report file
-          ./gradlew assembleDebug --no-daemon --stacktrace --info >> "$REPORT_TEMP" 2>&1
+          ./gradlew assembleRelease --no-daemon --stacktrace --info >> "$REPORT_TEMP" 2>&1
           BUILD_EXIT=$?
 
-          # 3. Append final summary footer
           {
             echo ""
             echo "----------------------------------------------------"
@@ -81,7 +78,6 @@ jobs:
             fi
           } >> "$REPORT_TEMP"
 
-          # 4. Route to final -success.txt or -failure.txt and cleanup old variants
           rm -f ../../build-logs/receiver-success.txt ../../build-logs/receiver-failure.txt
           if [ $BUILD_EXIT -eq 0 ]; then
             mv "$REPORT_TEMP" ../../build-logs/receiver-success.txt
@@ -94,18 +90,18 @@ jobs:
       - name: Upload Receiver APK Immediately
         uses: actions/upload-artifact@v4
         with:
-          name: receiver-debug-apk
-          path: android/SandorsReceiver/app/build/outputs/apk/debug/app-debug.apk
+          name: sandor's portal
+          path: android/SandorsReceiver/app/build/outputs/apk/release/app-release.apk
 
       - name: Sync Clean Logs to Repo Root
         if: always()
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
+          git pull --rebase origin main
           git add build-logs/
           git commit -m "chore: update latest receiver build report [skip ci]" || echo "No changes to commit"
-          git push
+          git push origin main
 
   build-sender:
     name: Build SandorsSender
@@ -142,7 +138,6 @@ jobs:
           mkdir -p ../../build-logs
           REPORT_TEMP="../../build-logs/sender-build-temp.txt"
           
-          # 1. Write headers and system info directly to the temporary report
           {
             echo "===================================================="
             echo " SANDORS SENDER - BUILD DIAGNOSTICS"
@@ -162,11 +157,9 @@ jobs:
             echo "----------------------------------------------------"
           } > "$REPORT_TEMP"
 
-          # 2. Run Gradle and append ALL stdout/stderr live into the report file
-          ./gradlew assembleDebug --no-daemon --stacktrace --info >> "$REPORT_TEMP" 2>&1
+          ./gradlew assembleRelease --no-daemon --stacktrace --info >> "$REPORT_TEMP" 2>&1
           BUILD_EXIT=$?
 
-          # 3. Append final summary footer
           {
             echo ""
             echo "----------------------------------------------------"
@@ -179,7 +172,6 @@ jobs:
             fi
           } >> "$REPORT_TEMP"
 
-          # 4. Route to final -success.txt or -failure.txt and cleanup old variants
           rm -f ../../build-logs/sender-success.txt ../../build-logs/sender-failure.txt
           if [ $BUILD_EXIT -eq 0 ]; then
             mv "$REPORT_TEMP" ../../build-logs/sender-success.txt
@@ -192,15 +184,15 @@ jobs:
       - name: Upload Sender APK Immediately
         uses: actions/upload-artifact@v4
         with:
-          name: sender-debug-apk
-          path: android/SandorsSender/app/build/outputs/apk/debug/app-debug.apk
+          name: sandor's portal
+          path: android/SandorsSender/app/build/outputs/apk/release/app-release.apk
 
       - name: Sync Clean Logs to Repo Root
         if: always()
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
+          git pull --rebase origin main
           git add build-logs/
           git commit -m "chore: update latest sender build report [skip ci]" || echo "No changes to commit"
-          git push
+          git push origin main
