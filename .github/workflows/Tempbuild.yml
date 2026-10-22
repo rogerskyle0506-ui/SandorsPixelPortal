@@ -63,7 +63,7 @@ jobs:
             echo "----------------------------------------------------"
           } > "$REPORT_TEMP"
 
-          ./gradlew assembleRelease --no-daemon --stacktrace --info >> "$REPORT_TEMP" 2>&1
+          ./gradlew assembleDebug --no-daemon --stacktrace --info >> "$REPORT_TEMP" 2>&1
           BUILD_EXIT=$?
 
           {
@@ -91,14 +91,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sandor's portal
-          path: android/SandorsReceiver/app/build/outputs/apk/release/app-release.apk
+          path: android/SandorsReceiver/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Sync Clean Logs to Repo Root
         if: always()
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git stash --include-untracked
           git pull --rebase origin main
+          git stash pop || true
           git add build-logs/
           git commit -m "chore: update latest receiver build report [skip ci]" || echo "No changes to commit"
           git push origin main
@@ -157,7 +159,7 @@ jobs:
             echo "----------------------------------------------------"
           } > "$REPORT_TEMP"
 
-          ./gradlew assembleRelease --no-daemon --stacktrace --info >> "$REPORT_TEMP" 2>&1
+          ./gradlew assembleDebug --no-daemon --stacktrace --info >> "$REPORT_TEMP" 2>&1
           BUILD_EXIT=$?
 
           {
@@ -185,14 +187,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sandor's portal
-          path: android/SandorsSender/app/build/outputs/apk/release/app-release.apk
+          path: android/SandorsSender/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Sync Clean Logs to Repo Root
         if: always()
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git stash --include-untracked
           git pull --rebase origin main
+          git stash pop || true
           git add build-logs/
           git commit -m "chore: update latest sender build report [skip ci]" || echo "No changes to commit"
           git push origin main
