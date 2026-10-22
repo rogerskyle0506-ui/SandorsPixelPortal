@@ -63,7 +63,7 @@ jobs:
             echo "----------------------------------------------------"
           } > "$REPORT_TEMP"
 
-          ./gradlew assembleDebug --no-daemon --stacktrace --info >> "$REPORT_TEMP" 2>&1
+          ORG_GRADLE_PROJECT_jvmargs="-Xmx3g -XX:+HeapDumpOnOutOfMemoryError" ./gradlew assembleDebug --no-daemon --stacktrace >> "$REPORT_TEMP" 2>&1
           BUILD_EXIT=$?
 
           {
@@ -160,7 +160,7 @@ jobs:
             echo "----------------------------------------------------"
           } > "$REPORT_TEMP"
 
-          ./gradlew assembleDebug --no-daemon --stacktrace --info >> "$REPORT_TEMP" 2>&1
+          ORG_GRADLE_PROJECT_jvmargs="-Xmx3g -XX:+HeapDumpOnOutOfMemoryError" ./gradlew assembleDebug --no-daemon --stacktrace >> "$REPORT_TEMP" 2>&1
           BUILD_EXIT=$?
 
           {
