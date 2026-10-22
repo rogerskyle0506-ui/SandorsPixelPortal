@@ -90,7 +90,7 @@ jobs:
       - name: Upload Receiver APK Immediately
         uses: actions/upload-artifact@v4
         with:
-          name: sandor's portal
+          name: sandors-receiver-apk
           path: android/SandorsReceiver/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Sync Clean Logs to Repo Root
@@ -186,7 +186,7 @@ jobs:
       - name: Upload Sender APK Immediately
         uses: actions/upload-artifact@v4
         with:
-          name: sandor's portal
+          name: sandors-sender-apk
           path: android/SandorsSender/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Sync Clean Logs to Repo Root
