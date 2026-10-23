@@ -1,1 +1,44 @@
+name: Unzip Archive to Root (Protected)
 
+on:
+  workflow_dispatch:
+    inputs:
+      zip_filename:
+        description: 'Name of the zip file to extract (must be in the root directory)'
+        required: true
+        default: 'archive.zip'
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract and sync safely (protecting .github)
+        run: |
+          ZIP_FILE="${{ inputs.zip_filename }}"
+          
+          if [ ! -f "$ZIP_FILE" ]; then
+            echo "Error: Zip file '$ZIP_FILE' not found in the root directory."
+            exit 1
+          fi
+          
+          echo "Extracting to a temporary staging directory..."
+          mkdir -p temp_extracted
+          unzip -q "$ZIP_FILE" -d temp_extracted
+          
+          echo "Syncing files to root while skipping any incoming .github folder..."
+          rsync -av --exclude='.github' temp_extracted/ ./
+          
+          # Clean up temporary directory
+          rm -rf temp_extracted
+          
+          # Optional: remove the zip file after extraction
+          # rm "$ZIP_FILE"
+
+      - name: Commit extracted files
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Unzip ${{ inputs.zip_filename }} into root (protected .github/workflows)"
+          branch: main
