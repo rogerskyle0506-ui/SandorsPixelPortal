@@ -1,11 +1,7 @@
 ====================================================
  SANDORS RECEIVER - BUILD DIAGNOSTICS
 ====================================================
-<<<<<<< Updated upstream
-Timestamp: Fri Oct 23 03:25:26 UTC 2026
-=======
-Timestamp: Fri Oct 23 03:25:51 UTC 2026
->>>>>>> Stashed changes
+Timestamp: Fri Oct 23 03:40:05 UTC 2026
 
 ----------------------------------------------------
  1. SYSTEM & ENVIRONMENT INFORMATION
@@ -41,14 +37,13 @@ Daemon will be stopped at the end of the build
 > Task :app:packageDebugResources
 > Task :app:mergeDebugResources
 > Task :app:parseDebugLocalResources
-> Task :app:mapDebugSourceSetPaths
 > Task :app:checkDebugAarMetadata
 > Task :app:dataBindingGenBaseClassesDebug
+> Task :app:mapDebugSourceSetPaths
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
-> Task :app:processDebugManifestForPackage
 > Task :app:javaPreCompileDebug
 > Task :app:mergeDebugShaders
 > Task :app:compileDebugShaders NO-SOURCE
@@ -56,34 +51,30 @@ Daemon will be stopped at the end of the build
 > Task :app:mergeDebugAssets
 > Task :app:compressDebugAssets
 > Task :app:desugarDebugFileDependencies
-> Task :app:processDebugResources
-> Task :app:checkDebugDuplicateClasses
 > Task :app:mergeDebugStartupProfile
-> Task :app:compileDebugKotlin
+> Task :app:mergeDebugJniLibFolders
+> Task :app:processDebugManifestForPackage
+> Task :app:checkDebugDuplicateClasses
+> Task :app:processDebugResources
 > Task :app:mergeExtDexDebug
+> Task :app:mergeLibDexDebug
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :app:compileDebugKotlin
 > Task :app:compileDebugJavaWithJavac
 > Task :app:dexBuilderDebug
 > Task :app:mergeDebugGlobalSynthetics
 > Task :app:processDebugJavaRes
-> Task :app:mergeDebugJniLibFolders
-> Task :app:mergeLibDexDebug
 > Task :app:mergeProjectDexDebug
-> Task :app:mergeLibDexDebug
-> Task :app:mergeDebugNativeLibs NO-SOURCE
-> Task :app:stripDebugDebugSymbols NO-SOURCE
 > Task :app:mergeDebugJavaResource
-> Task :app:validateSigningDebug
-> Task :app:writeDebugAppMetadata
-> Task :app:writeDebugSigningConfigVersions
 > Task :app:packageDebug
 > Task :app:createDebugApkListingFileRedirect
 > Task :app:assembleDebug
 
-<<<<<<< Updated upstream
-BUILD SUCCESSFUL in 1m 25s
-=======
-BUILD SUCCESSFUL in 1m 17s
->>>>>>> Stashed changes
+BUILD SUCCESSFUL in 1m 23s
 38 actionable tasks: 38 executed
 
 ----------------------------------------------------
