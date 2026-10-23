@@ -1,7 +1,11 @@
 ====================================================
  SANDORS RECEIVER - BUILD DIAGNOSTICS
 ====================================================
+<<<<<<< Updated upstream
 Timestamp: Fri Oct 23 03:25:26 UTC 2026
+=======
+Timestamp: Fri Oct 23 03:25:51 UTC 2026
+>>>>>>> Stashed changes
 
 ----------------------------------------------------
  1. SYSTEM & ENVIRONMENT INFORMATION
@@ -62,6 +66,7 @@ Daemon will be stopped at the end of the build
 > Task :app:mergeDebugGlobalSynthetics
 > Task :app:processDebugJavaRes
 > Task :app:mergeDebugJniLibFolders
+> Task :app:mergeLibDexDebug
 > Task :app:mergeProjectDexDebug
 > Task :app:mergeLibDexDebug
 > Task :app:mergeDebugNativeLibs NO-SOURCE
@@ -74,7 +79,11 @@ Daemon will be stopped at the end of the build
 > Task :app:createDebugApkListingFileRedirect
 > Task :app:assembleDebug
 
+<<<<<<< Updated upstream
 BUILD SUCCESSFUL in 1m 25s
+=======
+BUILD SUCCESSFUL in 1m 17s
+>>>>>>> Stashed changes
 38 actionable tasks: 38 executed
 
 ----------------------------------------------------
